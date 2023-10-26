@@ -7,7 +7,7 @@ const register = async (req, res, next) => {
   try {
     const { name, email, DOB, phoneNumber, language } = req.body;
 
-    const validatePhoneNumber = async () => {
+    const validatePhoneNumber =  () => {
       /* The line `const phoneNumberToBeCleaned = phoneNumber.replace(/\D/g, "");` is removing all
   non-digit characters from the `phoneNumber` string. The regular expression `/\D/g` matches any
   non-digit character (`\D`) globally (`g`) in the string. So, this line essentially removes any
@@ -21,16 +21,18 @@ const register = async (req, res, next) => {
 
       if (phoneNumberToBeCleaned.charAt(0) === "0") {
         const cleanedPhoneNumber = phoneNumberToBeCleaned.slice(1);
-        const formattedPhoneNumber = await cleanedPhoneNumber.padStart(13, "234");
+        const formattedPhoneNumber = cleanedPhoneNumber.padStart(13, "234");
         return formattedPhoneNumber; 
       }
     };
+    const validPhoneNumber = validatePhoneNumber();
+    console.log(validPhoneNumber); 
 
     const newUser = new User({
       name,
       email,
       DOB,
-      phoneNumber: validatePhoneNumber,
+      phoneNumber: validPhoneNumber,
       language,
     });
     const savedUser = await newUser.save();
@@ -67,7 +69,7 @@ const verify = async (req, res, next) => {
         user in the `User` array or collection (depending on the implementation of the `User` model)
         whose `_id` property matches the `decodedToken.userId`. It is essentially searching for a
         user with the same ID as the one decoded from the JWT token. */
-    const user = User.find((u) => u._id === decodedToken.userId);
+    const user = User.find(u => u._id === decodedToken.userId);
     res.status(200).json(user);
   } catch (error) {
     next(error);
